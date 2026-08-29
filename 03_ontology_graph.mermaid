@@ -1,0 +1,125 @@
+%% Ontology v0.1 — trimmed graph
+%% Only the most important entities and predicates. Full model in the CSVs and JSON.
+%% Solid arrows = structural relationships. Dotted arrows = event/materialization.
+
+flowchart LR
+
+  subgraph L1["L1 · Party"]
+    Brand
+    VI["VendorImporter"]
+    STC["SourcingTradingCompany"]
+    Fac["Factory (us)"]
+    Sub["Subcontractor<br/>(CMT / KNIT / EMB / WASH)"]
+    Merch["MerchandiserPerson"]
+  end
+
+  subgraph L2["L2 · Commercial"]
+    Prog["Program"]
+    SS["StoreStyle"]
+    FS["FactoryStyle"]
+    Contract
+    SO["StyleOrder"]
+    PL["PricingLine"]
+    Price
+    PO["PurchaseOrder"]
+  end
+
+  subgraph L3["L3 · Product spec"]
+    Color["ColorSpecification<br/>(multi-key)"]
+    Fabric["FabricSpecification<br/>(decomposed)"]
+    Art["Artwork (画稿)"]
+    SizeS["SizeScheme"]
+    Label["LabelSpecification"]
+    Pack["PackagingSpecification"]
+    Test["TestingRequirement"]
+  end
+
+  subgraph L4["L4 · Manufacturing"]
+    MR["MaterialRequirement"]
+    Knit["KnittingPlan"]
+    Dye["DyeLot (批号)"]
+    Cut["CuttingPlan"]
+    Emb["EmbroideryJob"]
+    Sew["SewingJob"]
+    Pk["PackingJob"]
+    Ship["Shipment"]
+    Inv["Invoice"]
+  end
+
+  subgraph L5["L5 · Logistics"]
+    SA["SizeAllocation"]
+    CA["CartonAllocation"]
+    Carton
+    UPC
+  end
+
+  subgraph L6["L6 · Events"]
+    SE["StageEvent"]
+    SD["StageDeadline"]
+  end
+
+  subgraph LX["Cross · Provenance"]
+    Doc["Document"]
+    Prov["Provenance"]
+  end
+
+  %% Party chain
+  Brand -- served_by --> VI
+  VI -- sourced_through --> STC
+  STC -- contracts_with --> Fac
+  Fac -- subcontracts_to --> Sub
+  STC -- employs --> Merch
+
+  %% Commercial hierarchy
+  Brand -. for_brand .- Prog
+  Prog -- contains --> SS
+  SS -- realized_as --> FS
+  SS -- governed_by --> Contract
+  Contract -- on_behalf_of --> Brand
+  Contract -- booked_as --> SO
+  SO -- comprises --> PL
+  PL -- priced_at --> Price
+  PO -- references_store_style --> SS
+
+  %% Product spec attachments
+  FS -- specifies_fabric --> Fabric
+  FS -- specifies_color --> Color
+  FS -- applies_art --> Art
+  FS -- sized_by --> SizeS
+  FS -- applies_label --> Label
+  FS -- applies_packaging --> Pack
+  FS -- applies_testing --> Test
+
+  %% Manufacturing chain
+  SO -- requires --> MR
+  MR -- plans_knitting --> Knit
+  Knit -- performed_by --> Sub
+  Knit -- dyed_into --> Dye
+  Dye -- materializes_color --> Color
+  SO -- plans_cutting --> Cut
+  Cut -- consumes_dyelot --> Dye
+  Cut -- produces_pieces_for --> Emb
+  Emb -- uses_artwork --> Art
+  Emb -- feeds --> Sew
+  Sew -- performed_by --> Sub
+  Sew -- packed_by --> Pk
+  Pk -- fulfills --> PO
+  Pk -- produces_carton --> Carton
+  Ship -- dispatches --> Carton
+  Inv -- bills --> SO
+
+  %% Logistics hierarchy
+  PO -- distributed_over --> SA
+  SA -- packed_into --> CA
+  CA -- instantiates --> Carton
+  Carton -- labeled_with_upc --> UPC
+
+  %% Events (cross-cutting; showing anchor pattern only)
+  SE -. affects .-> SO
+  SE -. recorded_in .-> Doc
+  SD -. deadline_for .-> Cut
+  SD -. deadline_for .-> Dye
+
+  %% Provenance (cross-cutting; not drawing every fact)
+  Prov -. of_fact .-> Fac
+  Prov -. sourced_from .-> Doc

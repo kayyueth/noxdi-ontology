@@ -1,0 +1,46 @@
+entity,definition,grain,primary_identifier,lifecycle_stage,evidence,confidence,status
+Brand,Retailer that sells finished garment (甲方),1 per retailer,brand_name,T1_contract,D2 商店 = Lane Bryant; D6 filename,OBSERVED,CONFIRMED (C2)
+VendorImporter,Brand's US-side vendor/importer sitting between brand and sourcing agent,1 per vendor,vendor_name,T1_contract,D2 客户 = BCI,OBSERVED,CONFIRMED (C7)
+SourcingTradingCompany,Chinese trading company that sources from the factory on behalf of vendor (乙方 vis-à-vis factory),1 per trading company,company_short_name,T1_contract → T9,D1 客户;D2 header 象山锦秀服饰有限公司鄞州分公司;D5-D8 客户,OBSERVED,CONFIRMED (C1)
+Factory,The factory itself (this ontology's self-reference; 丙方),1 (self),factory_short_name,ALL,D5-D8 headers 宁波润悦服饰有限公司,OBSERVED,CONFIRMED
+Subcontractor,"Downstream shop the factory outsources to (roles: CMT, KNIT, EMBROIDERY, WASH, DYE)",1 per (name; role),T5_fabric → T8_pack,D8 生产工厂=名苑; D6/D7 织造加工=林海织造; D8 协作单位=家顺; D1 水洗厂=红水,OBSERVED,CONFIRMED (C3 for name normalization)
+MerchandiserPerson,Named individual at a SourcingTradingCompany owning the order end-to-end,1 per person,person_name,ALL,D1 客户 suffix; D3/D4 footer 胡颖洁,OBSERVED,PROVISIONAL
+Program,Buyer-initiated grouping (e.g. M####) that spans several StoreStyles shipped as one campaign,1 per program_code,program_code,T1_contract → T8_pack,D2 PROGRAM# = M7797 on 4 sheets;D9 spans same M7797 across 3 store styles;D1 rows 169-192 share M7797,OBSERVED,PROVISIONAL (M6; U-7)
+StoreStyle,Buyer's own style/SKU identifier (7-digit for LB),1 per store_style_code,store_style_code,T1 → T8,D2 sheet names;D3/D4/D6/D9/D10 dual cells,OBSERVED,PROVISIONAL
+FactoryStyle,Factory's internal style code (pattern XXX##X#-###XX{2-3}),1 per factory_style_code,factory_style_code,ALL,D0 STYLE;D1 embedded;every other doc,OBSERVED,PROVISIONAL
+FactoryStyleRevision,A prior/superseded factory style code that a current FactoryStyle descends from,0..1 per FactoryStyle,composite (current; prior),T4_sampling,A2 filename references FBB54S2-388ELB while current is FBB54S2-997XLB,INFERRED_HIGH,UNRESOLVED (U-1)
+Contract,"Formal CMT purchase between SourcingTradingCompany and CMT Subcontractor, per StoreStyle",1 per (StoreStyle; CMT_Subcontractor),composite (contract_date; store_style; cmt_subcontractor),T1_contract,D2 (4 sheets = 4 contracts under one PROGRAM),OBSERVED,PROVISIONAL
+StyleOrder,Factory's own record of a booking for one (contract; factory_style; colour) — aggregates PricingLines,1 per (contract; factory_style; colour),composite,T2_order_intake → T9_invoice,D1 R171+R172 together = one StyleOrder,OBSERVED,PROVISIONAL (M1)
+PricingLine,Commercial line at grain StyleOrder × pricing_bracket (regular vs plus-size premium),1 per (StyleOrder; pricing_bracket),composite,T3_costing → T9_invoice,D1 R171 (2679@¥28) vs R172 (160@¥31);D0 rows 1 & 6 mirror,OBSERVED,PROVISIONAL (M1)
+Price,"Individual price value on a PricingLine, discriminated by price_type",1 per (PricingLine; price_type[; document]),composite,T3_costing → T9_invoice,"regular: target=27 D0, quoted=28.5 D0, booked=28 D1; plus: 31/32/31",OBSERVED,CONFIRMED (M2; C6)
+PurchaseOrder,Buyer-issued PO,1 per po_number,po_number,T7_trims → T8_pack,D9 PO#; D10 PO#; D2 slot 待定,OBSERVED,PROVISIONAL (M4; issuer U-5)
+Product,Product-type designation (品名),1 per FactoryStyle,factory_style_ref,T1,D2 品名; D8 品名; D10 品名,OBSERVED,PROVISIONAL
+ColorSpecification,"Colour concept for a style, held in four coexisting names — no single key is universal",1 per (StoreStyle; colour concept),composite (buyer_color_name OR swatch_code),T1 → T8,"D2 BLUE INDIGO; D5 藏青; D7 26C12344-D色丈青; D1 mixed",OBSERVED,PROVISIONAL (M5; U-6)
+SizeScheme,"Controlled vocabulary of sizes for a (Brand; product_type)",1 per scheme,scheme_id,T1 → T8,LB_PLUS_10_TO_40 in D2/D8/D9/D10;STANDARD_XS_XXL in D3-Sheet1,OBSERVED,PROVISIONAL (attachment U-4)
+Size,One bucket within a SizeScheme,1 per (SizeScheme; size_label),composite,T1 → T8,D2 header 10/12 ... 38/40,OBSERVED,CONFIRMED
+FabricSpecification,"Description of one fabric; raw text preserved and structured atoms extracted",1 per (FactoryStyle; fabric role),composite,T1_contract → T6_cut_plan,D0/D2/D5/D6/D7/D8 fabric fields,OBSERVED,PROVISIONAL
+MaterialComponent,"BOM line: garment part → FabricSpecification with per-piece consumption",1 per (FactoryStyle; garment_part),composite,T5_fabric_plan,D5 (0.324 body/sleeve/collar; 0.004 rib collar tape);D2 序号/部位/面辅料,OBSERVED,PROVISIONAL
+Artwork,Embroidery/print art asset (画稿 linking id),1 per art_asset_id,art_asset_id (e.g. 997X),T1_art_brief,D4 画稿=997X → A5 997X Football sequins EMB.ai;A6/A8 confirmation,OBSERVED,CONFIRMED (C5)
+EmbroiderySpecification,Per-style rule for embroidery execution including size-scaled versions,1 per FactoryStyle,composite,T6_cut_plan,D8 绣花小版(100%) / 绣花大版(110%),OBSERVED,PROVISIONAL
+LabelSpecification,"Specification for one label kind (main/care+tracker/hangtag/side)",1 per (FactoryStyle; label_type),composite,T7_trims,D9 主标/洗标和追踪标/价格牌,OBSERVED,PROVISIONAL
+PackagingSpecification,"Per-style packaging spec: polybag; glassine; carton",1 per FactoryStyle,composite,T7_trims,D9 sheets 胶袋警告语/油光纸参考/纸箱-独色独码 BULK,OBSERVED,PROVISIONAL
+TestingRequirement,3rd-party test spec (BV observed),1 per (FactoryStyle; testing_agency),composite,T1_contract,D2 测试要求 verbatim,OBSERVED,PROVISIONAL
+MaterialRequirement,Aggregate of greige/yarn requirements for one (StyleOrder; colour),1 per (StyleOrder; colour),composite,T5_fabric_plan,D5 投料计划,OBSERVED,PROVISIONAL
+YarnRequirement,Yarn quantity required,1 per (StyleOrder; colour; yarn_spec),composite,T5_fabric_plan,D5 购纱 950 KG (computed 931.836 + buffer),OBSERVED,PROVISIONAL
+KnittingPlan,"Knit order to a KnitSubcontractor, per fabric×colour",1 per (fabric_spec; colour; subcontractor),composite,T5_knit_plan,D6 织造计划单 (林海织造),OBSERVED,PROVISIONAL
+FabricBatch,Physical batch of greige fabric produced by a KnittingPlan,1 per (KnittingPlan; batch),composite,T5_knit_plan,inferred layer between KnittingPlan and DyeLot,INFERRED_LOW,PROVISIONAL (U-10 — may collapse into KnittingPlan)
+DyeLot,Batch of fabric dyed to one colour (批号),1 per batch_number (scope UNRESOLVED U-2),batch_number,T5_dye_plan,D7 批号=524; D8 批号/色样=524,OBSERVED,PROVISIONAL (U-2)
+CuttingPlan,Cutting-room plan producing per-size pieces from a DyeLot,1 per (StyleOrder; DyeLot),composite,T6_cut_plan,D8 裁剪计划单,OBSERVED,PROVISIONAL
+EmbroideryJob,Outsourced embroidery run on cut pieces,1 per (CuttingPlan; Artwork),composite,T6_cut_plan → T11_emb,D8 协作单位 家顺 + A5 art,OBSERVED,PROVISIONAL
+SewingJob,CMT sewing run on embroidered pieces,1 per (CuttingPlan; colour),composite,T12_cmt,D8 生产工厂 名苑;D1 status text,OBSERVED,PROVISIONAL
+PackingJob,"Packing run for one (SewingJob; PurchaseOrder)",1 per (SewingJob; PurchaseOrder),composite,T8_pack,D10 装箱单 per PO block,OBSERVED,PROVISIONAL
+Shipment,Completed dispatch of one or more POs' cartons,1 per shipment event,composite (date; PO(s)),T9_ship,D1 成衣工厂 cell = 5/22 郁建东发货,OBSERVED,PROVISIONAL
+Invoice,"Factory's invoice to SourcingTradingCompany, covering StyleOrder line amount",1 per invoice event,composite,T9_invoice,D1 开票情况 6/3开票 + cols 13/14 amounts,OBSERVED,PROVISIONAL
+SizeAllocation,Planned+packed pieces per (PurchaseOrder; Size),1 per (PO; Size),composite,T7_trims → T8_pack,D9 per-PO per-size; D10 sums per size,OBSERVED,CONFIRMED grain
+CartonAllocation,"Cartons per (PurchaseOrder; Size; carton_number range)",1 per D10 packing row,composite,T8_pack,D10 rows,OBSERVED,CONFIRMED grain
+Carton,Physical box,1 per carton_number (within PO),composite (PO; carton_number),T8_pack,D10 箱号 / 每箱件数 / 毛净重 / dims / vol,OBSERVED,CONFIRMED grain
+UPC,GTIN/UPC identifier per (PO; Size),1 per (PO; Size),composite,T7_trims → T8_pack,D10 包装 column with 9-digit numbers (601567944 etc.); D2 slot 包装和UPS# 待定,OBSERVED (typo of UPC# per prior analysis),PROVISIONAL
+StageEvent,"Time-anchored event: any of 17 event_types (see 03_event_model.md)",1 per event,composite,ALL,derived from doc dates + status text,OBSERVED (dates) / INFERRED_HIGH (event boundaries),PROVISIONAL
+StageDeadline,"Specialisation of StageEvent with actual_date=null; represents an internal target",1 per deadline,composite,T5_fabric_plan → T6_cut_plan,D7 成衣交期 4/25; D8 交货期 5/7,INFERRED_HIGH (per C4),PROVISIONAL
+Document,"Source Excel/PDF/AI/DXF/JPG file with metadata (D0..D10; A1..A5)",1 per file,file_path,ALL,file inventory in step 01,OBSERVED,CONFIRMED
+Provenance,Per-fact record of raw value + source_document + extraction_method + confidence,1 per (fact; source),composite,ALL,attached to every normalized attribute value,OBSERVED,CONFIRMED

@@ -1,0 +1,166 @@
+entity,attribute,type,unit,required,source_fields,normalization_rule,confidence
+Brand,brand_name,text,,Y,D2 商店 · D6 filename,uppercase-preserving direct copy,OBSERVED
+VendorImporter,vendor_name,text,,Y,D2 客户,direct copy,OBSERVED
+SourcingTradingCompany,company_short_name,text,,Y,D1 客户 (before /),split D1 客户 on / → left side,OBSERVED
+SourcingTradingCompany,company_legal_name,text,,N,D2 header,direct copy of header line,OBSERVED
+Factory,factory_short_name,text,,Y,D5-D8 header,direct copy,OBSERVED
+Subcontractor,subcontractor_name,text,,Y,D8 生产工厂 · D6 织造加工 · D8 协作单位 · D1 水洗厂,normalize 茗苑→名苑 per C3; keep raw_variants[],OBSERVED
+Subcontractor,role,enum(CMT|KNIT|EMBROIDERY|WASH|DYE),,Y,derived from source column,map column-name → role,INFERRED_HIGH
+Subcontractor,contact_phone,text,,N,D8 联系方式,direct copy,OBSERVED
+MerchandiserPerson,person_name,text,,Y,D1 客户 (after /) · D3/D4 footer,split D1 客户 on / → right side,OBSERVED
+Program,program_code,text,,Y,D2 PROGRAM# · D9 · D10 · D1 embedded,regex ^M\d+ from D1 款号 cell,OBSERVED
+Program,first_seen_date,date,,N,earliest source doc date,min of related doc dates,INFERRED_HIGH
+StoreStyle,store_style_code,text,,Y,D2 sheet name · D3/D4/D6/D9/D10 dual cell,regex \d{7} in dual cell,OBSERVED
+StoreStyle,brand_ref,ref(Brand),,Y,D2 商店,direct copy,OBSERVED
+StoreStyle,program_ref,ref(Program),,Y,D2 PROGRAM#,direct copy,OBSERVED
+FactoryStyle,factory_style_code,text,,Y,D0 STYLE · D1 款号 · every other doc,regex [A-Z]{3}\d{2}[A-Z]\d-\d{3}[A-Z]{2\,3},OBSERVED
+FactoryStyle,revision_of_ref,ref(FactoryStyle),,N,A2 filename hint,manual mapping,INFERRED_LOW
+FactoryStyle,product_type_ref,ref(Product),,Y,D2 品名,direct copy,OBSERVED
+FactoryStyle,size_scheme_ref,ref(SizeScheme),,Y,D2 header row size labels,detect from column headers,OBSERVED
+Contract,contract_date,date,,Y,D2 filename or first cell,parse M.D → YYYY-MM-DD with year from filename,OBSERVED
+Contract,contract_delivery_date,date,,Y,D2 交期,parse ISO datetime,OBSERVED (C4)
+Contract,contract_quantity,integer,pieces,Y,D2 数量,direct copy,OBSERVED
+Contract,testing_agency,text,,N,D2 测试要求 first line,extract phrase (BV测试公司),OBSERVED
+Contract,no_wash_flag,boolean,,N,D2 大货不需要水洗,text match 不水洗 / 不需要水洗,OBSERVED
+Contract,raw_fabric_bom_text,text,,Y,D2 面辅料,preserve raw multi-row text,OBSERVED
+Contract,raw_testing_text,text,,Y,D2 测试要求,preserve raw text,OBSERVED
+StyleOrder,booked_order_date,date,,Y,D1 下单时间,parse M.D or M/D + year from section banner,INFERRED_HIGH
+StyleOrder,contract_ref,ref(Contract),,Y,derived,join on program+store_style+color,INFERRED_HIGH
+StyleOrder,sourcing_trading_ref,ref(SourcingTradingCompany),,Y,D1 客户,split-first,OBSERVED
+StyleOrder,merchandiser_ref,ref(MerchandiserPerson),,Y,D1 客户,split-second,OBSERVED
+PricingLine,pricing_bracket,enum(regular|plus_size_premium|other),,Y,derived from D0/D1 co-occurrence,two prices with same style → two brackets,INFERRED_HIGH
+PricingLine,quantity_priced,integer,pieces,Y,D0 数量 · D1 数量/件,direct copy,OBSERVED
+PricingLine,covers_sizes,list[ref(Size)],,N,derived,plus bracket ≈ larger sizes; not explicit,INFERRED_LOW
+Price,amount,decimal,RMB,Y,D0 价格/目标价 · D1 col13,direct copy,OBSERVED (C6 for D1)
+Price,currency,text,,Y,constant RMB,constant,OBSERVED
+Price,unit,enum(per_piece),,Y,constant,constant,OBSERVED
+Price,price_type,enum(target|quoted|booked),,Y,derived from source field,D0 目标价→target · D0 价格→quoted · D1 col13→booked,CONFIRMED (M2; C6)
+Price,document_ref,ref(Document),,Y,,derived from source,OBSERVED
+Price,document_date,date,,Y,filename/mtime,derived from source,OBSERVED
+Price,is_current,boolean,,Y,,latest per (PricingLine; price_type),PROVISIONAL
+PurchaseOrder,po_number,text,,Y,D9 PO# · D10 PO#,direct copy,OBSERVED
+PurchaseOrder,buyer_dept,text,,N,D10 Dept,direct copy,OBSERVED
+PurchaseOrder,store_style_ref,ref(StoreStyle),,Y,D9/D10 款号,extract store_style from dual cell,OBSERVED
+PurchaseOrder,color_ref,ref(ColorSpecification),,Y,D9/D10 颜色,match on buyer_color_name,OBSERVED
+PurchaseOrder,packing_mode,text,,N,D9 包装,direct copy (BULK独码 …),OBSERVED
+PurchaseOrder,po_quantity,integer,pieces,Y,D9 数量,direct copy,OBSERVED
+Product,product_type_normalized,text,,Y,D2 品名 · D8 品名 · D10 品名,pick most specific (女式T恤 over 女式T over T恤),INFERRED_HIGH
+Product,raw_variants,list[text],,Y,collect all source values,append raw values,OBSERVED
+ColorSpecification,buyer_color_name,text,,N,D2 颜色 (order block),extract before Chinese parenthetical,OBSERVED
+ColorSpecification,factory_color_name,text,,N,D5/D6 颜色,direct copy,OBSERVED
+ColorSpecification,swatch_code,text,,N,D7 批号 line color · D8 颜色,regex \d{2}[A-Z]?C?\d+-[A-Z](色\S+)?,INFERRED_HIGH
+ColorSpecification,raw_color_text,list[text],,Y,every raw cell,append raw values,OBSERVED
+ColorSpecification,dye_method,text,,N,D7 颜色 prefix,extract prefix (单染棉/单染涤/双染/氧漂/不水洗),INFERRED_HIGH
+SizeScheme,scheme_id,text,,Y,derived,constant enum,PROVISIONAL
+SizeScheme,scheme_labels,list[text],,Y,D2 header row,extract size buckets column headers,OBSERVED
+Size,size_label,text,,Y,D2 header,direct copy,OBSERVED
+FabricSpecification,raw_spec_text,text,,Y,D0 面料克重/成份 · D2 面辅料 · D5-D8 面料质地,preserve raw multi-line text,OBSERVED
+FabricSpecification,yarn_count,text,,N,parse from raw_spec_text,regex \d{2,3}S,INFERRED_HIGH
+FabricSpecification,fibre_composition,map[fibre→pct],,N,parse,regex \d+%(棉|涤|氨纶|BCI棉|POLY|C(otton)?),INFERRED_HIGH
+FabricSpecification,blend_ratio,text,,N,parse,e.g. 60/40 from 60棉40涤,INFERRED_HIGH
+FabricSpecification,fabric_type,text,,N,parse,extract 汗布/毛圈布/罗纹/竹节汗布/SLUB jersey/…,INFERRED_HIGH
+FabricSpecification,gsm,integer,g/m²,N,parse,regex (\d+)\s*(gsm|G|克|克重),INFERRED_HIGH
+FabricSpecification,width_greige_cm,integer,cm,N,D5 毛门幅,parse (\d+)CM,OBSERVED
+FabricSpecification,width_customer_inch,integer,inch,N,D0 客户门幅,parse (\d+)",OBSERVED
+FabricSpecification,finish,text,,N,parse,extract 单染棉/单染涤/双染/烂花水洗/不水洗/成衣染色,INFERRED_HIGH
+FabricSpecification,compliance_requirements,list[text],,N,D5 header 不含新疆棉;D2 vendor implies BCI,extract enum,OBSERVED
+MaterialComponent,garment_part,text,,Y,D5 部位;D2 序号 部位,direct copy,OBSERVED
+MaterialComponent,consumption_kg_per_pc,decimal,kg,N,D5 单件用料/KG,direct copy,OBSERVED
+MaterialComponent,fabric_ref,ref(FabricSpecification),,Y,D5 面料质地,join on fabric spec,OBSERVED
+MaterialComponent,raw_bom_line,text,,Y,,preserve raw source line,OBSERVED
+Artwork,art_asset_id,text,,Y,D4 画稿,direct copy,CONFIRMED (C5)
+Artwork,art_type,enum(embroidery|print|beading|sequin_emb),,N,D2 工艺要求;filename hint,text match,INFERRED_HIGH
+Artwork,position_on_garment,text,,N,D8 部位;D2 工艺要求,direct copy,OBSERVED
+Artwork,art_file_refs,list[ref(Document)],,N,A5/A6/A7/A8 filenames,match by art_asset_id prefix,OBSERVED
+EmbroiderySpecification,has_small_version_100pct,boolean,,N,D8 marker,text match,OBSERVED
+EmbroiderySpecification,has_large_version_110pct,boolean,,N,D8 marker,text match,OBSERVED
+EmbroiderySpecification,applies_to_sizes,list[ref(Size)],,N,D8 column context,column adjacency,INFERRED_HIGH
+LabelSpecification,label_type,enum(main|care_tracker|hangtag|side),,Y,D9 column name,map D9 column → label_type,OBSERVED
+LabelSpecification,template_ref,text,,Y,D9 内容见附页,external ref,OBSERVED
+LabelSpecification,position_description,text,,Y,D9 cell text,preserve,OBSERVED
+LabelSpecification,attachment_method,text,,N,D9 cell text,parse (透明枪针/车缝),INFERRED_HIGH
+PackagingSpecification,polybag_type,text,,N,D9 胶袋警告语 sheet,parse,OBSERVED
+PackagingSpecification,polybag_sticker_ref,text,,N,D9 胶袋贴纸,preserve,OBSERVED
+PackagingSpecification,glassine_paper_required,boolean,,N,D9 油光纸参考,text match,OBSERVED
+PackagingSpecification,carton_type,text,,N,D9 纸箱 sheet,parse (三瓦楞 ETC),OBSERVED
+PackagingSpecification,carton_marking_ref,text,,Y,D9 纸箱 sheet,preserve,OBSERVED
+TestingRequirement,testing_agency,text,,Y,D2 测试要求 first line,extract phrase,OBSERVED
+TestingRequirement,test_categories,list[text],,N,D2 测试要求 lines,split on numbered items,INFERRED_HIGH
+TestingRequirement,raw_requirement_text,text,,Y,D2,preserve,OBSERVED
+MaterialRequirement,style_order_ref,ref(StyleOrder),,Y,D5,derive,OBSERVED
+MaterialRequirement,color_ref,ref(ColorSpecification),,Y,D5 颜色,derive,OBSERVED
+YarnRequirement,yarn_type,text,,Y,D5 narrative (32S CVC 60/40 竹节纱),parse,OBSERVED
+YarnRequirement,required_kg,decimal,kg,Y,D5 购纱,parse number,OBSERVED
+YarnRequirement,computed_from_greige_kg,decimal,kg,N,D5 毛坯用料合计,direct copy,OBSERVED
+KnittingPlan,subcontractor_ref,ref(Subcontractor),,Y,D6 织造加工,direct copy,OBSERVED
+KnittingPlan,greige_kg,decimal,kg,Y,D6 毛坯布数量(KG),direct copy,OBSERVED
+KnittingPlan,greige_width_cm,integer,cm,N,D6 毛门幅,parse,OBSERVED
+KnittingPlan,state,enum(PLANNED|REVISED|ACTUAL),,Y,derived from doc + status,default PLANNED unless actuals present,OBSERVED
+FabricBatch,greige_qty_kg,decimal,kg,Y,D6 · D7,derive,INFERRED_HIGH
+FabricBatch,width_cm,integer,cm,N,D6/D7 毛门幅,parse,OBSERVED
+DyeLot,batch_number,text,,Y,D7 批号,direct copy,OBSERVED
+DyeLot,dyed_kg,decimal,kg,N,D7 重量KG,direct copy,OBSERVED
+DyeLot,swatch_code_ref,ref(ColorSpecification.swatch_code),,Y,D7 颜色,extract swatch code,OBSERVED
+DyeLot,dye_method,text,,N,D7 颜色 prefix,parse (单染棉/单染涤/双染),INFERRED_HIGH
+DyeLot,state,enum(PLANNED|REVISED|ACTUAL),,Y,D7 实拷KG populated → ACTUAL else PLANNED,map,OBSERVED
+CuttingPlan,bulk_qty,integer,pieces,Y,D8 大货数量,direct copy,OBSERVED
+CuttingPlan,planned_ship_qty_by_size,map[size→int],,Y,D8 计划发货数,parse row-wise,OBSERVED
+CuttingPlan,planned_cut_qty_by_size,map[size→decimal],,Y,D8 计划裁剪数,parse row-wise,OBSERVED
+CuttingPlan,wastage_pct_by_size,map[size→decimal],,N,derive,(cut - ship) / ship,CALCULATE
+CuttingPlan,subcontractor_cmt_ref,ref(Subcontractor),,Y,D8 生产工厂,direct copy,OBSERVED
+CuttingPlan,state,enum(PLANNED|REVISED|ACTUAL),,Y,default PLANNED,constant,PROVISIONAL
+EmbroideryJob,subcontractor_ref,ref(Subcontractor),,Y,D8 协作单位,direct copy,OBSERVED
+EmbroideryJob,state,enum(PLANNED|REVISED|ACTUAL),,Y,derived,default PLANNED,PROVISIONAL
+SewingJob,subcontractor_ref,ref(Subcontractor),,Y,D8 生产工厂,direct copy,OBSERVED
+SewingJob,operator_person,text,,N,D1 status text,parse from ship note,INFERRED_LOW
+SewingJob,state,enum(PLANNED|REVISED|ACTUAL),,Y,derived,default PLANNED unless ship recorded → ACTUAL,PROVISIONAL
+PackingJob,po_ref,ref(PurchaseOrder),,Y,D10 PO#,direct copy,OBSERVED
+PackingJob,packing_mode,text,,Y,D10 header,direct copy,OBSERVED
+PackingJob,state,enum(PLANNED|REVISED|ACTUAL),,Y,D10 populated → ACTUAL,OBSERVED
+Shipment,actual_ship_date,date,,Y,D1 成衣工厂 · D1 交货期 (Excel serial 46164),parse text → date; consolidate,OBSERVED
+Shipment,handler_person,text,,N,D1 郁建东,parse,OBSERVED
+Shipment,origin_factory_ref,ref(Subcontractor),,Y,D1 名苑发货,parse,OBSERVED
+Shipment,raw_status_text,text,,Y,D1 成衣工厂,preserve raw,OBSERVED
+Invoice,invoice_date,date,,Y,D1 开票情况,parse M.D → YYYY-MM-DD,OBSERVED
+Invoice,amount_rmb,decimal,RMB,Y,D1 col14,direct copy,OBSERVED (C6)
+Invoice,raw_status_text,text,,Y,D1 开票情况,preserve,OBSERVED
+SizeAllocation,po_ref,ref(PurchaseOrder),,Y,D9 rows,derive,OBSERVED
+SizeAllocation,size_ref,ref(Size),,Y,D9 columns,column name,OBSERVED
+SizeAllocation,pieces_planned,integer,pieces,Y,D9 cell,direct copy,OBSERVED
+SizeAllocation,pieces_packed,integer,pieces,N,D10 sum,sum of carton lines,CALCULATE
+CartonAllocation,carton_number_from,integer,,Y,D10 箱号 (before -),parse range,OBSERVED
+CartonAllocation,carton_number_to,integer,,Y,D10 箱号 (after -; or same),parse range,OBSERVED
+CartonAllocation,carton_count,integer,,Y,D10 箱数,direct copy,OBSERVED
+CartonAllocation,pieces_per_carton,integer,pieces,Y,D10 每箱件数,direct copy,OBSERVED
+CartonAllocation,size_ratio_per_carton,map[size→int],,Y,D10 per-size columns,parse row,OBSERVED
+CartonAllocation,upc_ref,ref(UPC),,Y,D10 包装 numeric,parse 9-digit,OBSERVED
+Carton,carton_number,text,,Y,D10 箱号,direct copy (may be range),OBSERVED
+Carton,pieces_in_carton,integer,,Y,D10 每箱件数,direct copy,OBSERVED
+Carton,gross_weight_kg,decimal,kg,Y,D10 每箱毛重,direct copy,OBSERVED
+Carton,net_weight_kg,decimal,kg,Y,D10 每箱净重,direct copy,OBSERVED
+Carton,length_cm,integer,cm,Y,D10 长*宽*高 split,parse,OBSERVED
+Carton,width_cm,integer,cm,Y,D10 长*宽*高 split,parse,OBSERVED
+Carton,height_cm,integer,cm,Y,D10 长*宽*高 split,parse,OBSERVED
+Carton,volume_m3,decimal,m³,Y,D10 每箱体积,direct copy or CALCULATE,OBSERVED
+UPC,upc_number,text,,Y,D10 包装 numeric,parse 9-digit,OBSERVED
+StageEvent,event_type,enum(17 event types),,Y,derived,map from source doc + status text,PROVISIONAL
+StageEvent,affected_object_ref,ref(any),,Y,derived,per event type,PROVISIONAL
+StageEvent,planned_date,date,,N,plan doc date,parse,OBSERVED
+StageEvent,actual_date,date,,N,status text or ship note,parse,OBSERVED
+StageEvent,status,enum(PLANNED|IN_PROGRESS|DONE|REVISED|CANCELLED),,Y,derived,map,PROVISIONAL
+StageEvent,source_document_ref,ref(Document),,Y,,derive,OBSERVED
+StageEvent,raw_evidence_text,text,,Y,,preserve raw,OBSERVED
+StageEvent,confidence,enum(OBSERVED|INFERRED_HIGH|INFERRED_LOW),,Y,,per event,PROVISIONAL
+Document,file_path,text,,Y,filesystem,direct,OBSERVED
+Document,document_kind,enum(Quote|OrderRegister|Contract|LabDipBrief|ArtBrief|YarnPlan|KnitPlan|DyePlan|CutPlan|TrimsSpec|PackingList|BuyerPP|FitEval|Pattern|GradingRule|ArtMaster|PhotoConfirmation),,Y,derived,map,PROVISIONAL
+Document,document_date,date,,N,filename or mtime,parse,OBSERVED
+Document,author_party_ref,ref(Party),,N,derived,map by document_kind,INFERRED_HIGH
+Provenance,normalized_value,any,,Y,,copy result,OBSERVED
+Provenance,raw_value,text,,Y,cell text,copy raw,OBSERVED
+Provenance,source_document_ref,ref(Document),,Y,,derive,OBSERVED
+Provenance,source_sheet,text,,N,,derive,OBSERVED
+Provenance,source_location,text,,Y,row/col or cell,derive,OBSERVED
+Provenance,extraction_method,enum(direct|regex|parse|manual),,Y,derived,per extractor,OBSERVED
+Provenance,confidence,enum(OBSERVED|INFERRED_HIGH|INFERRED_LOW),,Y,,per fact,OBSERVED
+Provenance,observed_at,timestamp,,Y,,extraction time,OBSERVED
+Provenance,document_date,date,,N,,derive,OBSERVED

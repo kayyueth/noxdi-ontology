@@ -1,0 +1,162 @@
+canonical_concept,raw_field_name,raw_value,source_document,is_first_observation,downstream_documents,transformation_type,business_grain,workflow_stage,confidence
+brand,商店,Lane Bryant,D2,Y,D9(filename),COPY,brand,T1_contract,OBSERVED
+brand,(filename),LANE BRYANT,D9,N,—,COPY,brand,T7_trims,OBSERVED
+vendor_importer,客户,BCI,D2,Y,—,COPY,vendor_importer,T1_contract,OBSERVED
+sourcing_trading_company,(recipient implicit),锦秀,D0,Y,D1;D5;D6;D7;D8,ENRICH,sourcing_trading,T3_costing,INFERRED_HIGH
+sourcing_trading_company,客户,锦秀/胡颖洁,D1,N,—,SPLIT (name/merchandiser),sourcing_trading,T2_order_intake,OBSERVED
+sourcing_trading_company,客户,锦秀公司/胡颖洁,D5,N,—,COPY,sourcing_trading,T5_yarn_plan,OBSERVED
+sourcing_trading_company,客户,锦秀公司/胡颖洁,D6,N,—,COPY,sourcing_trading,T5_knit_plan,OBSERVED
+sourcing_trading_company,客户,锦秀公司/胡颖洁,D7,N,—,COPY,sourcing_trading,T5_dye_plan,OBSERVED
+sourcing_trading_company,客户,锦秀公司/胡颖洁,D8,N,—,COPY,sourcing_trading,T6_cut_plan,OBSERVED
+sourcing_trading_company,(contract header),象山锦秀服饰有限公司鄞州分公司,D2,N,—,ENRICH (full legal name),sourcing_trading,T1_contract,OBSERVED
+merchandiser,客户 (suffix),胡颖洁,D1,Y,D5;D6;D7;D8;D3(footer);D4(footer),SPLIT (from 客户),merchandiser_person,T2_order_intake,OBSERVED
+merchandiser,footer,胡颖洁,D3,N,—,COPY,merchandiser_person,T1_labdip_brief,OBSERVED
+merchandiser,footer,胡颖洁,D4,N,—,COPY,merchandiser_person,T1_art_brief,OBSERVED
+factory_us,(document header),宁波润悦服饰有限公司,D5;D6;D7;D8,Y,—,COPY,factory_self,T5-T6,OBSERVED
+cmt_subcontractor,茗苑 (contract header marker),茗苑,D2,Y,D9(marker);D8;D1,NORMALIZE (茗苑→名苑),cmt_subcontractor,T1_contract,OBSERVED
+cmt_subcontractor,生产工厂,名苑,D8,N,—,COPY,cmt_subcontractor,T6_cut_plan,OBSERVED
+cmt_subcontractor,成衣工厂,5/22 郁建东发货,D1,N,—,MERGE (person + ship note; vendor is implicit),cmt_subcontractor,T9_ship,OBSERVED
+knit_subcontractor,织造加工,林海织造,D6,Y,D7,COPY,knit_subcontractor,T5_knit_plan,OBSERVED
+knit_subcontractor,织造加工,林海织造,D7,N,—,COPY,knit_subcontractor,T5_dye_plan,OBSERVED
+knit_subcontractor,(narrative),林海,D5,N,—,COPY,knit_subcontractor,T5_yarn_plan,OBSERVED
+embroidery_subcontractor,协作单位,家顺,D8,Y,—,COPY,embroidery_subcontractor,T6_cut_plan,OBSERVED
+embroidery_subcontractor_phone,联系方式,13806640517,D8,Y,—,COPY,embroidery_subcontractor,T6_cut_plan,OBSERVED
+program_code,PROGRAM#,M7797,D2,Y,D9;D10,COPY,program,T1_contract,OBSERVED
+program_code,款号 (prefix),M7797    (in D1 R171/R172 款号 cell),D1,N,—,MERGE (into 款号 text),program,T2_order_intake,OBSERVED
+program_code,PROGRAM#,M7797,D9,N,—,COPY,program,T7_trims,OBSERVED
+program_code,PROGRAM,M7797,D10,N,—,COPY,program,T8_pack,OBSERVED
+store_style_code,(sheet name),1152246,D2,Y,D3;D4;D9;D10,COPY,store_style,T1_contract,OBSERVED
+store_style_code,款号,1152246 (in dual cell with FBB54S2-997XLB),D2,N,—,COPY,store_style,T1_contract,OBSERVED
+store_style_code,款号,1152246 (in dual cell),D3,N,—,COPY,store_style,T1_labdip_brief,OBSERVED
+store_style_code,款号,1152246 (in dual cell),D4,N,—,COPY,store_style,T1_art_brief,OBSERVED
+store_style_code,款号 (dual),商店款号1152246,D9,N,—,COPY,store_style,T7_trims,OBSERVED
+store_style_code,款号 (dual),商店款号1152246,D10,N,—,COPY,store_style,T8_pack,OBSERVED
+store_style_code,款号 (embedded),1152246,D1,N,—,MERGE (with PROGRAM# and factory code in one cell),store_style,T2_order_intake,OBSERVED
+factory_style_code,STYLE,FBB54S2-997XLB,D0,Y,D1;D2;D3;D4;D5;D6;D7;D8;D9;D10,COPY,factory_style,T3_costing,OBSERVED
+factory_style_code,款号,FBB54S2-997XLB,D1,N,—,MERGE (with PROGRAM# and store code),factory_style,T2_order_intake,OBSERVED
+factory_style_code,款号 (dual),FBB54S2-997XLB,D2,N,—,COPY,factory_style,T1_contract,OBSERVED
+factory_style_code,款号 (bare),FBB54S2-997XLB,D5;D6;D7;D8,N,—,COPY,factory_style,T5-T6,OBSERVED
+factory_style_code,款号 (dual),FBB54S2-997XLB,D9;D10,N,—,COPY,factory_style,T7-T8,OBSERVED
+product_type,品名,T恤,D2,Y,D8;D10,COPY,product_type,T1_contract,OBSERVED
+product_type,品名,女式T恤,D8,N,—,ENRICH (adds gender),product_type,T6_cut_plan,OBSERVED
+product_type,品名,女式T,D10,N,—,COPY (truncated),product_type,T8_pack,OBSERVED
+po_number,CUSTOMER PO#,(blank / 待定 for 1152246 sheet),D2,Y,D9;D10,COPY,po,T1_contract,OBSERVED
+po_number,PO#,728274,D9,N,D10,COPY,po,T7_trims,OBSERVED
+po_number,PO#,728275,D9,N,D10,COPY,po,T7_trims,OBSERVED
+po_number,PO#,728274,D10,N,—,COPY,po,T8_pack,OBSERVED
+po_number,PO#,728275,D10,N,—,COPY,po,T8_pack,OBSERVED
+buyer_dept,Dept,502,D10,Y,—,COPY,po_metadata,T8_pack,OBSERVED
+upc,包装 (numeric),601567949 (size 14/16 in PO 728274),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567944 (size 18/20),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567886 (size 22/24),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567945 (size 26/28),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567950 (size 10/12),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567948 (size 30/32),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567946 (size 34/36),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装 (numeric),601567951 (size 38/40),D10,Y,—,COPY,size_x_po_x_style,T8_pack,OBSERVED
+upc,包装和UPS# (label typo of UPC#),(blank / 待定),D2,Y (slot only),D9;D10,UNKNOWN,size_x_po_x_style,T1_contract,INFERRED_HIGH
+colour_english,颜色 (order block),BLUE INDIGO（蓝色）,D2,Y,D9;D10,COPY,color_english,T1_contract,OBSERVED
+colour_english,COLOR,BLUE INDIGO,D10,N,—,COPY,color_english,T8_pack,OBSERVED
+colour_english,颜色,BLUE INDIGO,D9,N,—,COPY,color_english,T7_trims,OBSERVED
+colour_chinese_common,颜色 (Chinese),藏青,D5;D6,Y,—,COPY,color_common,T5_fabric_plan,OBSERVED
+colour_chinese_common,颜色 (Chinese),丈青 (in swatch string),D1;D7;D8,N,—,COPY,color_common,T2/T5/T6,OBSERVED
+colour_swatch_code,颜色 (swatch code),26C12344-D色丈青,D7,Y,D1;D8,COPY,swatch_code,T5_dye_plan,OBSERVED
+colour_swatch_code,颜色,26C12344-D色丈青,D8,N,—,COPY,swatch_code,T6_cut_plan,OBSERVED
+colour_swatch_code,颜色,26C12344-D色丈青,D1,N,—,COPY,swatch_code,T2_order_intake,OBSERVED
+labdip_directive,色号,按照客样颜色出色卡,D3,Y,—,COPY,directive,T1_labdip_brief,OBSERVED
+buyer_sample_available,客样,有客样,D3,Y,—,COPY,sample_ref,T1_labdip_brief,OBSERVED
+art_asset_id,画稿,997X,D4,Y,external_A5(.ai file),COPY,art_asset,T1_art_brief,OBSERVED (linking per C5)
+art_asset_id,(filename),997X Football sequins EMB.ai,A5,N,—,COPY,art_asset,external,OBSERVED
+art_asset_id,(filename),997X 珠片绣花稿.jpg,A6,N,—,COPY,art_asset,external,OBSERVED
+art_asset_id,(filename),997XLB色卡确认.jpg,A7,N,—,COPY,art_asset,external,OBSERVED
+art_asset_id,(filename),绣花片确认.png,A8,N,—,COPY,art_asset,external,OBSERVED
+fabric_spec,面料克重/成份,"Self: CVC SLUB jersey 170GSM 大身CVC 竹节汗布",D0,Y,D1;D2;D5;D6;D7;D8;D3;D4,COPY,fabric_spec,T3_costing,OBSERVED
+fabric_spec,面料,大身/袖子/领子：32S CVC 60/40竹节汗布170G（单染棉）,D1,N,—,ENRICH (adds body part & dye method annotation),fabric_spec,T2_order_intake,OBSERVED
+fabric_spec,面辅料,蓝色，染棉，CVC 60棉40涤竹节汗布，克重170gsm...,D2,N,—,ENRICH (adds compliance & body-part BOM),fabric_spec,T1_contract,OBSERVED
+fabric_spec,面料质地/不含新疆棉,32S CVC60/40竹节汗布170G(成衣）,D5,N,—,ENRICH (adds no-Xinjiang-cotton compliance flag),fabric_spec,T5_yarn_plan,OBSERVED
+fabric_spec,面料质地,32S CVC60/40竹节汗布170G(成衣）,D6,N,—,COPY,fabric_spec,T5_knit_plan,OBSERVED
+fabric_spec,面料质地,32S CVC60/40竹节汗布170G(成衣）,D7,N,—,COPY,fabric_spec,T5_dye_plan,OBSERVED
+fabric_spec,面料质地,32S CVC60/40竹节汗布170G(成衣）,D8,N,—,COPY,fabric_spec,T6_cut_plan,OBSERVED
+fabric_spec,面料信息,本身布：蓝色，染棉，CVC 60棉40涤竹节汗布,D3,N,—,COPY,fabric_spec,T1_labdip_brief,OBSERVED
+fabric_spec,面料信息,本身布：蓝色，染棉，CVC 60棉40涤竹节汗布,D4,N,—,COPY,fabric_spec,T1_art_brief,OBSERVED
+fibre_composition,面料克重/成份 (parsed),CVC 60棉40涤,D0 (embedded),Y,—,SPLIT,composition,T3_costing,INFERRED_HIGH
+fabric_gsm,面料克重/成份 (parsed),170 GSM,D0 (embedded),Y,—,SPLIT,gsm,T3_costing,INFERRED_HIGH
+fabric_gauge,面料克重/成份 (parsed),32S,D0 (embedded),Y,—,SPLIT,yarn_count,T3_costing,INFERRED_HIGH
+fabric_family,面料克重/成份 (parsed),CVC SLUB jersey / 竹节汗布,D0 (embedded),Y,—,SPLIT,fabric_family,T3_costing,INFERRED_HIGH
+process_flag_no_wash,克重,不水洗,D0,Y,—,COPY,process_flag,T3_costing,OBSERVED
+process_flag_no_wash,工艺要求 / notes,大货不需要水洗,D2,N,—,COPY,process_flag,T1_contract,OBSERVED
+process_flag_bead_embroidery,工艺要求,1.裁片前片珠片绣,D2,Y,—,COPY,process_flag,T1_contract,OBSERVED
+process_flag_bead_embroidery,印绣花 部位,前片绣花,D8,N,—,COPY,process_flag,T6_cut_plan,OBSERVED
+compliance_no_xinjiang_cotton,面料质地/不含新疆棉 (header),不含新疆棉,D5,Y,D2(notes),ENRICH (baked into header),compliance,T5_yarn_plan,OBSERVED
+compliance_bci_cotton,面辅料 notes,BCI cotton (implied by BCI vendor),D2,Y,—,ENRICH,compliance,T1_contract,INFERRED_HIGH
+yardage_per_pc_yd,客户用料码,1.041 (regular) / 1.334 (plus),D0,Y,—,COPY,per_piece_measure,T3_costing,OBSERVED
+weight_per_pc_kg_greige,光坯用料,0.315 (regular) / 0.405 (plus),D0,Y,—,COPY,per_piece_measure,T3_costing,OBSERVED
+weight_per_pc_kg_body,单件用料/KG,0.324 (body/sleeve/collar),D5,Y,—,ENRICH (per-body-part),per_piece_measure,T5_yarn_plan,OBSERVED
+weight_per_pc_kg_trim,单件用料/KG,0.004 (post-neck rib),D5,Y,—,ENRICH (per-body-part),per_piece_measure,T5_yarn_plan,OBSERVED
+fabric_width_customer_inch,客户门幅,66",D0,Y,—,COPY,fabric_width,T3_costing,OBSERVED
+fabric_width_greige_cm,毛门幅,185CM,D5,Y,D6;D7,COPY (unit change),fabric_width,T5_yarn_plan,OBSERVED
+fabric_width_greige_cm,毛门幅,185CM,D6,N,—,COPY,fabric_width,T5_knit_plan,OBSERVED
+fabric_width_greige_cm,毛门幅,185CM,D7,N,—,COPY,fabric_width,T5_dye_plan,OBSERVED
+yarn_purchase_kg,购纱要求 (narrative),32S CVC竹节 950 KG,D5,Y,D6,CALCULATE (0.324×2839+trim×qty + buffer),yarn_qty,T5_yarn_plan,INFERRED_HIGH
+knit_qty_kg,32S纱数量,950,D6,N,—,COPY,yarn_qty,T5_knit_plan,OBSERVED
+greige_qty_kg,毛坯用料合计,919.836 (body) + 12 (trim) = 931.836,D5,Y,D6(920);D7(920),CALCULATE (per-piece × qty),greige_kg,T5_yarn_plan,OBSERVED
+greige_qty_kg,毛坯布数量(KG),920 + 12 = 932,D6,N,—,COPY (rounded),greige_kg,T5_knit_plan,OBSERVED
+greige_qty_kg,重量KG,920,D7,N,—,COPY (body only),greige_kg,T5_dye_plan,OBSERVED
+dye_lot,批号,524,D7,Y,D8,COPY,dye_lot,T5_dye_plan,OBSERVED
+dye_lot,批号/色样,524,D8,N,—,COPY,dye_lot,T6_cut_plan,OBSERVED
+contract_quantity,数量 (sheet 1152246),2839,D2,Y,D5;D8;D9,COPY,style_total,T1_contract,OBSERVED
+contract_quantity,数量 (per size row),2679 + 160 = 2839,D2,N,—,SPLIT (regular vs plus),style_x_size_bracket,T1_contract,OBSERVED
+order_line_quantity,数量/件,2679 (R171),D1,Y,—,COPY,order_line_row,T2_order_intake,OBSERVED
+order_line_quantity,数量/件,160 (R172),D1,Y,—,COPY,order_line_row,T2_order_intake,OBSERVED
+quotation_quantity,数量,2679 (row 1) / 160 (row 6),D0,Y,—,COPY,style_x_size_bracket,T3_costing,OBSERVED
+garment_qty_for_fabric,成衣数量,2839,D5,N,—,COPY,style_total,T5_yarn_plan,OBSERVED
+bulk_qty_for_cut,大货数量,2839,D8,N,—,COPY,style_total,T6_cut_plan,OBSERVED
+planned_ship_qty_by_size,计划发货数,85 / 564 / 785 / 726 / 586 / 48 / 27 / 18 (sum=2839),D8,Y,—,COPY (from D2 size ratio),style_x_size,T6_cut_plan,OBSERVED
+planned_cut_qty_by_size,计划裁剪数,88.4 / 586.56 / 816.4 / 755.04 / 609.44 / 51 / 30 / 21 (sum=2957.84),D8,Y,—,CALCULATE (planned_ship × 1.04 nominal),style_x_size,T6_cut_plan,OBSERVED
+po_quantity,数量 (per PO row),1189 (PO 728274) / 1650 (PO 728275),D9,Y,D10,SPLIT (from 2839),po,T7_trims,OBSERVED
+po_quantity,共计数量 (block sum),1189 / 1650,D10,N,—,CALCULATE (sum of carton lines),po,T8_pack,OBSERVED
+po_x_size_quantity,size columns per PO row,e.g. PO 728274: -/313/338/288/250/-/-/- ; PO 728275: 85/251/447/438/336/48/27/18,D9,Y,D10,SPLIT,po_x_size,T7_trims,OBSERVED
+po_x_size_quantity,size columns per carton,e.g. size 14/16=95 pcs/carton,D10,N,—,SPLIT,po_x_size_x_carton,T8_pack,OBSERVED
+style_total_quantity,总件数,2839,D9,N,—,CALCULATE (sum of PO qty),style_total,T7_trims,OBSERVED
+carton_count,箱数,3 / 1 / 3 / 1 / ...,D10,Y,—,COPY,po_x_size_bucket,T8_pack,OBSERVED
+carton_number,箱号,1-13 / 4 / 5 / ...,D10,Y,—,COPY,carton,T8_pack,OBSERVED
+pieces_per_carton,每箱件数,95 / 28 / 90 / 68 / 85 / 33 / 84 / 82 / ...,D10,Y,—,COPY,carton,T8_pack,OBSERVED
+carton_gross_wt_kg,每箱毛重(公斤),17 / 6 / 17 / 13 / 17 / 7.5 / 18 / 17.5,D10,Y,—,COPY,carton,T8_pack,OBSERVED
+carton_net_wt_kg,每箱净重(公斤),16 / 5 / 16 / 12 / 16 / 6.5 / 17 / 16.5,D10,Y,—,COPY,carton,T8_pack,OBSERVED
+carton_gross_wt_total,合计毛重(公斤),per-row aggregate,D10,Y,—,CALCULATE (箱数 × 每箱毛重),carton_line,T8_pack,OBSERVED
+carton_dimensions_cm,长*宽*高(公分),58*40*38 (and 58*40*20 for partial cartons),D10,Y,—,COPY,carton,T8_pack,OBSERVED
+carton_volume_m3,每箱体积(立方米),0.08816 (from 58×40×38),D10,Y,—,CALCULATE,carton,T8_pack,INFERRED_HIGH
+contract_delivery_date,交期,2026-04-20,D2,Y,—,COPY (authoritative per C4),style_x_program,T1_contract,OBSERVED
+expected_delivery_date,交货期 (Excel serial),46164 = 2026-05-22,D1,Y,—,OVERRIDE (revision on top of contract),order_line,T2_order_intake,OBSERVED
+actual_ship_date,成衣工厂 (free text),5/22 郁建东发货,D1,Y,—,COPY (event capture),order_line,T9_ship,OBSERVED
+stage_deadline_dye,成衣交期,2026.4.25,D7,Y,—,COPY,dye_lot,T5_dye_plan,INFERRED_HIGH (per C4)
+stage_deadline_cut,交货期,2026.5.7,D8,Y,—,COPY,style,T6_cut_plan,INFERRED_HIGH (per C4)
+plan_issue_date,footer date,2026.3.10 (yarn) / 2026.3.10 (dye) / 2026.3.19 (knit),D5;D7;D6,Y,—,COPY,document_metadata,T5,OBSERVED
+booked_order_date,下单时间,1/31 (year 2026 inferred from position),D1,Y,—,COPY,order_line,T2_order_intake,OBSERVED
+quote_document_date,(filename),2026.2.2,D0,Y,—,COPY,document_metadata,T3_costing,OBSERVED
+sample_progress_status,样衣进度,珠片绣OK，色卡OK，产前样4/3-4/16OK,D1,Y,—,MERGE (multi-event narrative),order_line,T4_sampling,OBSERVED
+fabric_progress_status,面料进度,3/11投料,D1,Y,—,MERGE (event date + label),order_line,T5_fabric_plan,OBSERVED
+invoice_status,开票情况,6/3开票,D1,Y,—,MERGE (date + label),order_line,T9_invoice,OBSERVED
+quoted_unit_price_rmb,价格,28.5 (regular) / 32 (plus),D0,Y,—,COPY,style_x_size_bracket,T3_costing,OBSERVED
+target_unit_price_rmb,目标价,27 (regular) / 31 (plus),D0,Y,—,COPY,style_x_size_bracket,T3_costing,OBSERVED
+booked_unit_price_rmb,col13 (unnamed),28.0 (R171) / 31.0 (R172),D1,Y,—,OVERRIDE (final booked ≠ quoted),order_line,T2_order_intake,OBSERVED (col header confirmed per C6)
+booked_line_amount_rmb,col14 (unnamed),75012.0 (R171) / 4960.0 (R172),D1,Y,—,CALCULATE (数量/件 × col13),order_line,T2_order_intake,OBSERVED (col header confirmed per C6)
+cost_fabric_per_pc,面料成本,13.23 (regular) / 17.03 (plus),D0,Y,—,CALCULATE (光坯用料 × 面料单价),style_x_size_bracket,T3_costing,OBSERVED
+cost_cmt,做工,3.8,D0,Y,—,COPY,style,T3_costing,OBSERVED
+cost_print_emb,印绣花,6,D0,Y,—,COPY,style,T3_costing,OBSERVED
+cost_trims,辅料,1.8,D0,Y,—,COPY,style,T3_costing,OBSERVED
+cost_per_pc_total,每件成本,13.4 (regular) / 17.2 (plus),D0,Y,—,CALCULATE (sum of cost buckets),style_x_size_bracket,T3_costing,OBSERVED
+size_ratio_scheme,column headers 10/12..38/40,{10/12,14/16,18/20,22/24,26/28,30/32,34/36,38/40},D2,Y,D8;D9;D10,COPY,size_scheme,T1_contract,OBSERVED
+testing_requirements,测试要求,大货测试要求：（BV测试公司）1. 请务必确保克重做足，成分正确...,D2,Y,—,COPY,style,T1_contract,OBSERVED
+packing_mode,包装,BULK独码 绝对不能短装,D9,Y,D10,COPY,po,T7_trims,OBSERVED
+packing_mode,包装 (header),独色独码入一个纸箱，每件一胶袋，要油光纸,D10,N,—,COPY,shipment,T8_pack,OBSERVED
+main_label_spec,主标,内容见附页 对折后放在后领中... 尺码含在主标中,D9,Y,—,COPY,style_x_size,T7_trims,OBSERVED
+care_tracker_label_spec,洗标和追踪标,洗标订在穿者左侧缝，下摆上3.5""，车在后片，有 Made...,D9,Y,—,COPY,style,T7_trims,OBSERVED
+hangtag_spec,价格牌,用3"" 透明枪针打在穿起左侧肩缝内...,D9,Y,—,COPY,style,T7_trims,OBSERVED
+polybag_sticker_spec,胶袋贴纸,衣服装入胶袋后，距底边距左边各3""...,D9,Y,—,COPY,po,T7_trims,OBSERVED
+carton_marking_spec,(纸箱-独色独码 BULK sheet),STYLE / SIZE & SKU / PO# / Dept / COLOR / Ship to,D9,Y,D10,COPY,carton,T7_trims,OBSERVED
+buyer_pp_document,(filename),1152246_001_PP Production_VND2160.pdf,A1,Y,—,COPY,program_x_store_style,T4_sampling,INFERRED_HIGH
+buyer_fit_document,(filename),规格样997XLB(FBB54S2-388ELB) 1ST FIT EVAL 1.21.26.pdf,A2,Y,—,COPY,factory_style,T4_sampling,OBSERVED
+pattern_dxf,(filename),997XLB(FBB54S2-388ELB).dxf,A3,Y,—,COPY,factory_style,T6_cut_plan,OBSERVED
+grading_rules,(filename),997XLB(FBB54S2-388ELB).rul,A4,Y,—,COPY,factory_style,T6_cut_plan,INFERRED_HIGH
+style_image,款式图,=DISPIMG(""ID_..."") (empty for D1 R171/R172 in this case),D1,Y,—,COPY,style,T2_order_intake,OBSERVED

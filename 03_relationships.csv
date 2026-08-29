@@ -1,0 +1,70 @@
+subject,predicate,object,cardinality,evidence,confidence,status
+Brand,served_by,VendorImporter,1..N,D2 (LB → BCI),OBSERVED,CONFIRMED (C7)
+VendorImporter,sourced_through,SourcingTradingCompany,1..N,D2 header shows 锦秀 issuing contract as vendor's agent,INFERRED_HIGH,PROVISIONAL
+SourcingTradingCompany,contracts_with,Factory,1..N,D1 客户 field on every internal doc,OBSERVED,CONFIRMED (C1)
+Factory,subcontracts_to,Subcontractor,1..N,D8 名苑/家顺;D6 林海织造;D1 红水,OBSERVED,CONFIRMED
+SourcingTradingCompany,employs,MerchandiserPerson,1..N,D1 客户 suffix 胡颖洁,OBSERVED,PROVISIONAL
+Contract,between_seller,Subcontractor,1..1,D2 contract binds 锦秀 (buyer) and 名苑 (CMT seller),INFERRED_HIGH,PROVISIONAL
+Contract,between_buyer,SourcingTradingCompany,1..1,D2 header 锦秀,OBSERVED,PROVISIONAL
+Contract,on_behalf_of,Brand,1..1,D2 商店 = Lane Bryant,OBSERVED,CONFIRMED
+Contract,references_program,Program,1..1,D2 PROGRAM# = M7797,OBSERVED,CONFIRMED
+Program,initiated_by,VendorImporter,1..1,D2 客户=BCI is only place VendorImporter appears; INFERRED that Program is issued down the chain from this vendor,INFERRED_HIGH,UNRESOLVED (U-5 scope)
+Program,for_brand,Brand,1..1,D2 商店 = Lane Bryant,OBSERVED,CONFIRMED
+Program,contains,StoreStyle,1..N,D2 4 tabs;D9 3 store styles under M7797,OBSERVED,PROVISIONAL
+StoreStyle,realized_as,FactoryStyle,1..N,dataset shows 1↔1 for this case; A2 hints at revisions,INFERRED_HIGH,UNRESOLVED (U-1)
+StoreStyle,governed_by,Contract,1..1,D2 contract per store style,OBSERVED,PROVISIONAL
+FactoryStyle,revision_of,FactoryStyle,0..1,A2 filename 388ELB vs current 997XLB (both share 997XLB root),INFERRED_LOW,UNRESOLVED (U-1)
+FactoryStyle,is_product_type,Product,1..1,D2 品名;D8 品名,OBSERVED,PROVISIONAL
+Contract,booked_as,StyleOrder,1..N,D2 → D1 rows 171/172 collectively,INFERRED_HIGH,PROVISIONAL
+StyleOrder,comprises,PricingLine,1..N,D1 R171 + R172 for same style/colour,OBSERVED,PROVISIONAL (M1)
+StyleOrder,references_factory_style,FactoryStyle,1..1,D1 款号,OBSERVED,PROVISIONAL
+StyleOrder,references_color,ColorSpecification,1..1,D1 颜色,OBSERVED,PROVISIONAL
+StyleOrder,booked_by,SourcingTradingCompany,1..1,D1 客户,OBSERVED,CONFIRMED (C1)
+StyleOrder,handled_by,MerchandiserPerson,1..1,D1 客户 suffix,OBSERVED,PROVISIONAL
+PricingLine,priced_at,Price,1..N,D0 target+quoted; D1 booked,OBSERVED,CONFIRMED (M2)
+PricingLine,covers_sizes,Size,0..N,D0/D1 pricing bracket implies size subset (regular vs plus),INFERRED_HIGH,PROVISIONAL (U-11)
+PurchaseOrder,references_store_style,StoreStyle,1..1,D9 PO tied to a store_style row,OBSERVED,PROVISIONAL
+PurchaseOrder,references_color,ColorSpecification,1..1,D9 rows are per PO×color,OBSERVED,PROVISIONAL
+PurchaseOrder,issued_by,VendorImporter,1..1,UNRESOLVED — could be Brand or Vendor or Sourcing,INFERRED_LOW,UNRESOLVED (U-5)
+PurchaseOrder,distributed_over,SizeAllocation,1..N,D9 per-PO per-size table,OBSERVED,CONFIRMED (M4)
+SizeAllocation,packed_into,CartonAllocation,1..N,D10 per-carton rows sum to SizeAllocation,OBSERVED,CONFIRMED
+CartonAllocation,instantiates,Carton,1..N,each row expands to 箱数 physical boxes,OBSERVED,CONFIRMED
+Carton,labeled_with_upc,UPC,1..1,D10 包装 column value per size row,OBSERVED,PROVISIONAL
+FactoryStyle,specifies_fabric,FabricSpecification,1..N,D0 face+trim fabric lines,OBSERVED,PROVISIONAL
+FabricSpecification,applies_to_part,MaterialComponent,1..N,D5 部位 field,OBSERVED,PROVISIONAL
+FactoryStyle,specifies_color,ColorSpecification,1..N,D2 4 colours across 4 sheets — one style has one colour typically,OBSERVED,PROVISIONAL
+FactoryStyle,sized_by,SizeScheme,1..1,D2 uses 10/12..38/40 for this LB style,OBSERVED,UNRESOLVED (U-4 attachment level)
+SizeScheme,contains,Size,1..N,D2 header,OBSERVED,CONFIRMED
+FactoryStyle,applies_art,Artwork,0..N,D4 画稿 → this style,OBSERVED,CONFIRMED (C5)
+Artwork,realized_by_file,Document,1..N,A5 A6 A7 A8 filenames share 997X,OBSERVED,CONFIRMED (C5)
+FactoryStyle,has_embroidery_spec,EmbroiderySpecification,0..1,D8 100%/110% markers,OBSERVED,PROVISIONAL
+FactoryStyle,applies_label,LabelSpecification,0..N,D9 主标 洗标 价格牌,OBSERVED,PROVISIONAL
+FactoryStyle,applies_packaging,PackagingSpecification,0..1,D9 packaging sheets,OBSERVED,PROVISIONAL
+FactoryStyle,applies_testing,TestingRequirement,0..N,D2 测试要求,OBSERVED,PROVISIONAL
+StyleOrder,requires,MaterialRequirement,1..1,D5 投料计划 per style-order,OBSERVED,PROVISIONAL
+MaterialRequirement,plans_yarn,YarnRequirement,1..N,D5 购纱 950 KG,OBSERVED,PROVISIONAL
+MaterialRequirement,plans_knitting,KnittingPlan,1..N,D6 织造计划单,OBSERVED,PROVISIONAL
+KnittingPlan,performed_by,Subcontractor,1..1,D6 织造加工 = 林海织造,OBSERVED,CONFIRMED
+KnittingPlan,produces_greige,FabricBatch,1..N,layer between knit and dye,INFERRED_LOW,UNRESOLVED (U-10 collapse)
+FabricBatch,dyed_into,DyeLot,1..N,D7 拷布单 assigns dye lot to greige,INFERRED_HIGH,PROVISIONAL
+DyeLot,materializes_color,ColorSpecification,1..1,D7 batch 524 tied to 26C12344-D swatch,OBSERVED,PROVISIONAL
+StyleOrder,plans_cutting,CuttingPlan,1..1,D8 per style-order,OBSERVED,PROVISIONAL
+CuttingPlan,consumes_dyelot,DyeLot,1..1,D8 批号/色样 = 524 references D7,OBSERVED,CONFIRMED
+CuttingPlan,produces_pieces_for,EmbroideryJob,0..1,D8 协作单位 家顺 handoff,OBSERVED,PROVISIONAL
+EmbroideryJob,performed_by,Subcontractor,1..1,D8 家顺,OBSERVED,CONFIRMED
+EmbroideryJob,uses_artwork,Artwork,1..N,D4 画稿=997X linked,OBSERVED,CONFIRMED (C5)
+EmbroideryJob,feeds,SewingJob,1..1,implicit precedence per lifecycle,INFERRED_HIGH,PROVISIONAL
+CuttingPlan,feeds,SewingJob,1..1,when no embroidery in path,INFERRED_HIGH,PROVISIONAL
+SewingJob,performed_by,Subcontractor,1..1,D8 生产工厂=名苑 (CMT),OBSERVED,CONFIRMED (C3)
+SewingJob,packed_by,PackingJob,1..N,D10 装箱单 per PO,OBSERVED,PROVISIONAL
+PackingJob,fulfills,PurchaseOrder,1..1,D10 PO#,OBSERVED,PROVISIONAL
+PackingJob,produces_carton,Carton,1..N,D10 箱号 rows,OBSERVED,CONFIRMED
+Shipment,dispatches,Carton,1..N,D1 status text names ship date;D10 is roster,INFERRED_HIGH,PROVISIONAL
+Shipment,references,PurchaseOrder,1..N,implicit,INFERRED_HIGH,PROVISIONAL
+Invoice,bills,StyleOrder,1..N,D1 col 14 line amount per row,OBSERVED,PROVISIONAL
+Invoice,billed_to,SourcingTradingCompany,1..1,D1 客户,OBSERVED,CONFIRMED (C1)
+StageEvent,affects,{various},1..1,event catalog,OBSERVED,PROVISIONAL
+StageEvent,recorded_in,Document,1..N,dates come from files,OBSERVED,CONFIRMED
+StageDeadline,deadline_for,{Fabric|Cutting|Embroidery|Sewing|Ship},1..1,D7 dye deadline 4/25;D8 cut deadline 5/7,INFERRED_HIGH,PROVISIONAL (C4)
+Provenance,of_fact,{any attribute},1..1,cross-cutting,OBSERVED,CONFIRMED
+Provenance,sourced_from,Document,1..1,cross-cutting,OBSERVED,CONFIRMED

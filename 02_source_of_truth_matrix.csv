@@ -1,0 +1,86 @@
+concept,originating_document,source_of_truth,downstream_copies,conflicting_versions,conflict_type,confidence
+brand,D2 (商店 = Lane Bryant),D2,D9 filename,none,none,OBSERVED
+vendor_importer,D2 (客户 = BCI),D2,none,none,none,OBSERVED
+sourcing_trading_company,D1 (客户 = 锦秀/胡颖洁),D1,"D5;D6;D7;D8;D3 footer;D4 footer",锦秀 vs 锦秀公司 vs 象山锦秀服饰有限公司鄞州分公司,revision (variant surface forms of same legal entity),OBSERVED
+merchandiser,D1 (客户 suffix = 胡颖洁),D1,"D5;D6;D7;D8;D3 footer;D4 footer",none for this case,none,OBSERVED
+factory_us (润悦),D5/D6/D7/D8 header,those document headers,implicit throughout,none,none,OBSERVED
+cmt_subcontractor,"D2 header (茗苑) [author=锦秀]; D8 生产工厂 (名苑) [author=润悦]",D8 (canonical spelling 名苑 per C3),"D1 status text (名苑 embedded)",茗苑 vs 名苑,data_error (transliteration variant of one entity — normalise to 名苑),OBSERVED (per C3)
+knit_subcontractor,D6 (织造加工 = 林海织造),D6,D7,none,none,OBSERVED
+embroidery_subcontractor,D8 (协作单位 = 家顺 + 联系方式 13806640517),D8,none,none,none,OBSERVED
+wash_subcontractor,n/a (this style is 不水洗),n/a,n/a,none (not applicable),n/a,OBSERVED
+program_code (M7797),D2 (PROGRAM#),D2,"D9 filename & main;D10 header;D1 款号 prefix",none,none,OBSERVED
+store_style_code (1152246),D2 (sheet name),D2,"D3;D4;D9;D10;D1 款号 embedded;A1 filename",none,none,OBSERVED
+factory_style_code (FBB54S2-997XLB),D0 (STYLE),D0,"D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;A2/A3/A4 filenames",none,none,OBSERVED
+product_type,D2 (品名 = T恤),D2,"D8 女式T恤;D10 女式T",女式T恤 vs 女式T vs T恤,revision (progressive enrichment — D8 adds gender; D10 truncated),OBSERVED
+po_number 728274,D9 (first populated occurrence),D9,D10,slot exists in D2 (待定) prior to fill,revision (待定 → filled),OBSERVED
+po_number 728275,D9 (first populated occurrence),D9,D10,slot exists in D2 (待定) prior to fill,revision (待定 → filled),OBSERVED
+buyer_dept (502),D10 (Dept),D10,none,none,none,OBSERVED
+upc (per size × PO),D10 (embedded in 包装 numeric column),D10,none,slot exists in D2 (包装和UPS# 待定) prior to fill,revision (待定 → filled),OBSERVED
+colour_english (BLUE INDIGO),D2 (颜色 order block),D2,D9;D10,none,none,OBSERVED
+colour_chinese_common (藏青 / 丈青),D5 (颜色 = 藏青); D7 (颜色 = 丈青 in swatch string),D5 and D7 disagree at surface,"D6 (藏青);D8;D1 (丈青)",藏青 (D5/D6) vs 丈青 (D7/D8/D1),stage-specific value (planning uses 藏青; dye/cut/log use 丈青 embedded in swatch string — both refer to same 26C12344-D navy),OBSERVED
+colour_swatch_code (26C12344-D),D7 (拷布单 批号 assignment),D7,D8;D1,none,none,OBSERVED
+labdip_directive,D3 (色号 = 按照客样颜色出色卡),D3,none,none,none,OBSERVED
+buyer_sample_available,D3 (客样 = 有客样),D3,none,none,none,OBSERVED
+art_asset_id (997X),D4 (画稿),D4,A5/A6/A7/A8 filenames,none,none,OBSERVED (per C5)
+fabric_spec,"D0 (面料克重/成份) — highest-detail schematic; D2 (面辅料) — most complete BOM prose","D2 (contract) — most authoritative single statement","D0;D1;D3;D4;D5;D6;D7;D8","D0 vs D2 vs D5 all say the same fabric with different phrasings",revision (progressive enrichment — no substantive disagreement),OBSERVED
+fibre_composition (CVC 60/40),embedded in D0/D2 fabric prose,D2 (contract prose),D5;D6;D7;D8,none,none,INFERRED_HIGH
+fabric_gsm (170gsm),embedded in D0/D2 fabric prose,D2 (contract prose),D5;D6;D7;D8,none,none,OBSERVED
+compliance_no_xinjiang_cotton,D5 header baked-in `/不含新疆棉`,D5 (planning enforces the constraint),D2 notes (BCI vendor implies BCI cotton),none,none,OBSERVED
+process_flag_no_wash,D0 克重=不水洗; D2 大货不需要水洗,D2 (contract statement),D5 notes,none,none,OBSERVED
+process_flag_bead_embroidery,D2 工艺要求 (1.裁片前片珠片绣),D2,"D8 印绣花 部位 = 前片绣花;D4 画稿 997X",none,none,OBSERVED
+yardage_per_pc_yd (1.041/1.334),D0 客户用料码,D0,none,none,none,OBSERVED
+weight_per_pc_kg_greige (0.315/0.405),D0 光坯用料 — per garment,D0,none,D0 0.315 vs D5 0.324 (body only),stage-specific value (D0 quotes full-garment greige; D5 sub-divides per body part — not directly comparable but numerically close),OBSERVED
+weight_per_pc_kg_by_part,D5 单件用料/KG,D5 (planning),none,none,none,OBSERVED
+fabric_width_customer_inch (66"),D0,D0,none,D0 66" vs D5/D6/D7 185CM,stage-specific value (customer-facing yard width vs greige tube width in cm — expected different),OBSERVED
+fabric_width_greige_cm (185CM),D5,D5,D6;D7,none,none,OBSERVED
+yarn_purchase_kg (950),D5 (购纱要求 narrative),D5,D6 32S纱数量 = 950,none,none,OBSERVED
+greige_qty_kg (~920 body / +12 trim),D5 毛坯用料合计,D5,D6 (932 total);D7 (920 body),D5 919.836 vs D6 932 (with trim) vs D7 920 (body only),stage-specific value (different denominators — body-only vs body+trim),OBSERVED
+dye_lot (批号 524),D7,D7,D8,none,none,OBSERVED
+contract_quantity (2839),D2,D2,"D5 (2839);D8 (2839);D9 (2839);D0 (2679+160=2839);D1 (2679+160=2839);D10 (1189+1650=2839)",none,none,OBSERVED (internally consistent)
+order_line_quantity (2679 / 160),D1 R171/R172,D1,D0 mirrors the split,none,none,OBSERVED
+quotation_quantity (2679/160),D0 数量,D0,D1 mirrors,none,none,OBSERVED
+planned_ship_qty_by_size,D8 计划发货数,D8,none,D8 sums to 2839;D9 per-PO×size sums also to 2839,none,none,OBSERVED
+planned_cut_qty_by_size,D8 计划裁剪数,D8,none,none,none,OBSERVED (calculated from planned_ship_qty × 1.04 nominal)
+po_quantity (728274=1189; 728275=1650),D9,D9,D10,none,none,OBSERVED
+po_x_size_quantity,D9,D9,D10 (exploded per carton),none,none,OBSERVED
+size_ratio_scheme (10/12..38/40),D2,D2,D8;D9;D10,none (all use same scheme),none,OBSERVED
+carton_count,D10,D10,none,none,none,OBSERVED
+carton_number,D10,D10,none,none,none,OBSERVED
+pieces_per_carton,D10,D10,none,none,none,OBSERVED
+carton_gross_wt_kg,D10,D10,none,none,none,OBSERVED
+carton_net_wt_kg,D10,D10,none,none,none,OBSERVED
+carton_dimensions_cm,D10,D10,none,none,none,OBSERVED
+carton_volume_m3,D10,D10,none,none,none,OBSERVED
+contract_delivery_date (2026-04-20),D2,D2 (per C4),none,"D7 (2026-04-25);D8 (2026-05-07);D1 (2026-05-22)","stage-specific value (D7/D8 are internal stage deadlines per C4); D1 is a revision (actual slip to 5/22)",OBSERVED
+expected_delivery_date (2026-05-22),D1 交货期 (46164),D1,D1 status text (matches),none,none,OBSERVED
+stage_deadline_dye (2026-04-25),D7,D7,none,none,none,INFERRED_HIGH per C4
+stage_deadline_cut (2026-05-07),D8,D8,none,none,none,INFERRED_HIGH per C4
+actual_ship_date (2026-05-22),D1 成衣工厂 text,D1,none,none,none,OBSERVED
+plan_issue_date_yarn (2026.3.10),D5 footer,D5,none,none,none,OBSERVED
+plan_issue_date_dye (2026.3.10),D7,D7,none,none,none,OBSERVED
+plan_issue_date_knit (2026.3.19),D6 footer,D6,none,none,none,OBSERVED
+booked_order_date (2026-01-31),D1 下单时间,D1,none,none,none,OBSERVED (year inferred from position in 2026 section)
+quoted_unit_price_rmb (28.5/32),D0 价格,D0,none,D0 28.5 vs D1 28.0 (regular);D0 32 vs D1 31.0 (plus),revision (booked price ≠ quote; matches D0 目标价 27/31 more closely for plus and ~ target for regular),OBSERVED
+target_unit_price_rmb (27/31),D0 目标价,D0,D1 booked closer to target than to quote,none,none,OBSERVED
+booked_unit_price_rmb (28.0/31.0),D1 col 13,D1 (per C6),none,none,none,OBSERVED (per C6)
+booked_line_amount_rmb (75012 / 4960),D1 col 14,D1 (per C6),none,none,none,OBSERVED (per C6) — CALCULATE
+cost_fabric_per_pc,D0 面料成本,D0,none,none,none,OBSERVED
+cost_cmt,D0 做工,D0,none,none,none,OBSERVED
+cost_print_emb,D0 印绣花,D0,none,none,none,OBSERVED
+cost_trims,D0 辅料,D0,none,none,none,OBSERVED
+cost_per_pc_total,D0 每件成本,D0,none,none,none,OBSERVED (CALCULATE)
+testing_requirements,D2 测试要求,D2,none,none,none,OBSERVED
+packing_mode (BULK独码),D9 包装,D9,D10 header,none,none,OBSERVED
+main_label_spec,D9 主标,D9,none,none,none,OBSERVED
+care_tracker_label_spec,D9 洗标和追踪标,D9,none,none,none,OBSERVED
+hangtag_spec,D9 价格牌,D9,none,none,none,OBSERVED
+polybag_sticker_spec,D9 胶袋贴纸,D9,none,none,none,OBSERVED
+carton_marking_spec,D9 纸箱-独色独码 BULK sheet,D9,D10,none,none,OBSERVED
+sample_progress_status,D1 样衣进度,D1,none,none,none,OBSERVED
+fabric_progress_status,D1 面料进度,D1,none,none,none,OBSERVED
+invoice_status (2026-06-03),D1 开票情况,D1,none,none,none,OBSERVED
+buyer_pp_document,A1,A1,none,none,none,INFERRED_HIGH
+buyer_fit_document,A2,A2,none,none,none,OBSERVED
+pattern_dxf,A3,A3,none,none,none,OBSERVED
+grading_rules,A4,A4,none,none,none,INFERRED_HIGH
+art_master_ai,A5,A5,linked via 画稿=997X in D4,none,none,OBSERVED
